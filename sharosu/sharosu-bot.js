@@ -552,34 +552,32 @@ const bountyGame = () => {
   const bountyReservation = gameReservation(GAME_TYPE.BOUNTY);
 
   const getGameInformation = (gameCount, reservation) =>
-    "Final Nine 4ㅑ로수\n" +
-    "♠️Monster Bounty game\n\n" +
-    "▪️월요일 한정 Max 21:00▪️\n\n" +
-    "⬛️◼️◾️▪️▪️◾️◼️⬛️\n" +
-    "▪️기존 Monster 게임과 동일\n" +
-    "◾️바운티당 +1만 시드\n" +
-    "▪️리바인 2회 (400만칩)\n" +
-    "◾️상대 탈락 시키면 바운티 +1 획득\n" +
-    "▪️최종 탈락시 보유 바운티 -1개 반납\n" +
-    "⬛️◼️◾️▪️▪️◾️◼️⬛️\n\n"+
-    "‼️1부 한정 얼리칩 +40‼️\n\n" +
-    "📢예약자 명단\n\n" +
+    "MONSTER - BOUNTY\n\n" +
+    "⏱️월요일 19:00~21:00 Max\n\n" +
+    "➜ 300만칩 Start (150bb)\n" +
+    "➜ 4만바인 / 4만Fs\n" +
+    "➜ Lv.3까지 셀프예약시 얼리 40만\n" +
+    "➜ 7엔트리당 10만 시드 + 바운티\n" +
+    "➜ 리바인 2회 (400만칩)\n" +
+    "➜ 상대 탈락시키면 바운티 + 1개\n" +
+    "➜ 최종 탈락시 보유 바운티 -1개 반납\n\n" +
+    "🅁 예약자 명단 (최소 5포이상)\n" +
     reservationListToString(reservation) + "\n" +
-    "⬛️ 문의사항은 핑크왕관에게 1:1톡 주세요";
+    "♠ 문의사항은 핑크왕관에게 1:1톡 부탁드립니다";
 
   const reservationListToString = (reservation) => {
     let result = "";
 
     for ([nickname, time] of reservation) {
-      result += "◾️ " + nickname + " " + time + "\n";
+      result += "★ " + nickname + " " + time + "\n";
     }
 
     if (reservation.length >= 10) {
-      result += "◾️ \n◾️ \n";
+      result += "★ \n★ \n";
     } else {
       const repeatCount = 10 - reservation.length;
       for (let i = 0; i < repeatCount; i++) {
-        result += "◾️ \n";
+        result += "★ \n";
       }
     }
 
@@ -607,7 +605,10 @@ const bountyGame = () => {
     },
     closeReservation: bountyReservation.closeReservation,
     openReservationNextGame: bountyReservation.openReservationNextGame,
-    endToday: bountyReservation.endToday,
+    endToday: () => {
+      bountyReservation.endToday();
+      bountyReservation.reserve(["A3"], "(19:00~21:00)");
+    },
   };
 }
 
