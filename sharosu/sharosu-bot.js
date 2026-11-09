@@ -73,6 +73,7 @@ const GAME_TYPE = {
   WEEKLY_TOURNAMENT: "주간토너먼트",
   X2_DAILY: "더블데일리",
   BOUNTY: "바운티",
+  FREEZE_OUT: "프리즈아웃",
 };
 
 const reservationServiceApiCall = (path, method, requestBody) => {
@@ -559,8 +560,7 @@ const bountyGame = () => {
     "➜ Lv.3까지 셀프예약시 얼리 40만\n" +
     "➜ 7엔트리당 10만 시드 + 바운티\n" +
     "➜ 리바인 2회 (400만칩)\n" +
-    "➜ 상대 탈락시키면 바운티 + 1개\n" +
-    "➜ 최종 탈락시 보유 바운티 -1개 반납\n\n" +
+    "➜ 상대 탈락시키면 상대  바운티 50%\n\n" +
     "🅁 예약자 명단 (최소 5포이상)\n" +
     reservationListToString(reservation) + "\n" +
     "♠ 문의사항은 핑크왕관에게 1:1톡 부탁드립니다";
@@ -608,6 +608,68 @@ const bountyGame = () => {
     endToday: () => {
       bountyReservation.endToday();
       bountyReservation.reserve(["A3"], "(19:00~21:00)");
+    },
+  };
+}
+
+const freezeOutGame = () => {
+  const freezeOutReservation = gameReservation(GAME_TYPE.FREEZE_OUT);
+
+  const getGameInformation = (gameCount, reservation) =>
+    "F R E E Z E - O U T \n\n" +
+    "⏱️수요일 19:00~21:00 Max\n\n" +
+    "➜ 700만칩 Start (350bb)\n" +
+    "➜ 4만바인 / 4만Fs\n" +
+    "➜ Lv.3까지 얼리칩 50만\n" +
+    "➜ 3엔트리당 시드 7만\n" +
+    "➜ 획득시드 2만당 승점 +1점 / 바인 +1점\n\n" +
+    "🅁 예약자 명단 (최소 5포이상)\n" +
+    reservationListToString(reservation) + "\n" +
+    "♠ 문의사항은 핑크왕관에게 1:1톡 부탁드립니다";
+
+  const reservationListToString = (reservation) => {
+    let result = "";
+
+    for ([nickname, time] of reservation) {
+      result += "★ " + nickname + " " + time + "\n";
+    }
+
+    if (reservation.length >= 10) {
+      result += "★ \n★ \n";
+    } else {
+      const repeatCount = 10 - reservation.length;
+      for (let i = 0; i < repeatCount; i++) {
+        result += "★ \n";
+      }
+    }
+
+    return result;
+  }
+
+  return {
+    gameType: GAME_TYPE.FREEZE_OUT,
+    getGameInformation: () => {
+      const { gameCount, reservation } =
+        freezeOutReservation.getReservationInfo();
+      return getGameInformation(gameCount, reservation);
+    },
+    reserve: (nicknames, time) => {
+      const { gameCount, reservation } = freezeOutReservation.reserve(
+        nicknames,
+        time
+      );
+      return getGameInformation(gameCount, reservation);
+    },
+    cancelReservation: (nicknames) => {
+      const { gameCount, reservation } =
+        freezeOutReservation.cancelReservation(nicknames);
+      return getGameInformation(gameCount, reservation);
+    },
+    closeReservation: freezeOutReservation.closeReservation,
+    openReservationNextGame: freezeOutReservation.openReservationNextGame,
+    endToday: () => {
+      freezeOutReservation.endToday();
+      freezeOutReservation.reserve(["A3"], "(19:00~21:00)");
     },
   };
 }
@@ -679,6 +741,8 @@ const COMMANDS = {
   X2_DAILY: "!x2",
   BOUNTY: "!바운티",
   BOUNTY_SHORT: "!바",
+  FREEZE_OUT: "!프리즈",
+  FREEZE_OUT_SHORT: "!프",
   END_TODAY: "!샤로수마감",
 };
 
@@ -773,6 +837,10 @@ function response(
             case COMMANDS.BOUNTY_SHORT:
               game = bountyGame();
               break;
+            case COMMANDS.FREEZE_OUT:
+            case COMMANDS.FREEZE_OUT_SHORT:
+              game = freezeOutGame();
+              break;
             default:
               break;
           }
@@ -819,6 +887,9 @@ function response(
             }
             if (new Date().getDay() === 2) {
               bountyGame().endToday();
+            }
+            if (new Date().getDate() === 4) {
+              freezeOutGame().endToday();
             }
           }
         }
